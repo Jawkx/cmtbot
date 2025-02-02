@@ -2,11 +2,14 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/charmbracelet/huh/spinner"
 	"net/http"
 	"os"
 	"os/exec"
+	"time"
 )
 
 const (
@@ -21,7 +24,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	messages, err := generateCommitMessages(diff)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var messages []string
+	spinnerDone := make(chan bool)
+	go func() {
+		s := spinner.New().Title("Generating commit messages...").Context(ctx)
+		s.Run()
+		spinnerDone <- true
+	}()
+
+	messages, err = generateCommitMessages(ctx, diff)
+	<-spinnerDone
+
 	if err != nil {
 		fmt.Printf("Error generating messages: %v\n", err)
 		os.Exit(1)
@@ -47,7 +63,7 @@ func getStagedDiff() (string, error) {
 	return out.String(), err
 }
 
-func generateCommitMessages(diff string) ([]string, error) {
+func generateCommitMessages(ctx context.Context, diff string) ([]string, error) {
 	prompt := fmt.Sprintf(
 		`You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me, only reply with the raw generated commit message and don't include any explaination of context
 
@@ -61,40 +77,47 @@ Code diff:
 
 	for i := 0; i < 5; i++ {
 		go func() {
-			reqBody, _ := json.Marshal(map[string]interface{}{
-				"model": modelName,
-				"messages": []map[string]string{
-					{"role": "user", "content": prompt},
-				},
-			})
-
-			resp, err := makeAPIRequest(reqBody)
-			if err != nil {
-				errChan <- err
+			select {
+			case <-ctx.Done():
+				errChan <- ctx.Err()
 				resultChan <- ""
 				return
-			}
-			defer resp.Body.Close()
+			default:
+				reqBody, _ := json.Marshal(map[string]interface{}{
+					"model": modelName,
+					"messages": []map[string]string{
+						{"role": "user", "content": prompt},
+					},
+				})
 
-			var result struct {
-				Choices []struct {
-					Message struct {
-						Content string `json:"content"`
-					} `json:"message"`
-				} `json:"choices"`
-			}
-			if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-				errChan <- err
-				resultChan <- ""
-				return
-			}
+				resp, err := makeAPIRequest(reqBody)
+				if err != nil {
+					errChan <- err
+					resultChan <- ""
+					return
+				}
+				defer resp.Body.Close()
 
-			if len(result.Choices) > 0 {
-				resultChan <- result.Choices[0].Message.Content
-			} else {
-				resultChan <- ""
+				var result struct {
+					Choices []struct {
+						Message struct {
+							Content string `json:"content"`
+						} `json:"message"`
+					} `json:"choices"`
+				}
+				if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+					errChan <- err
+					resultChan <- ""
+					return
+				}
+
+				if len(result.Choices) > 0 {
+					resultChan <- result.Choices[0].Message.Content
+				} else {
+					resultChan <- ""
+				}
+				errChan <- nil
 			}
-			errChan <- nil
 		}()
 	}
 
