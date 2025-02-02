@@ -48,40 +48,74 @@ func getStagedDiff() (string, error) {
 }
 
 func generateCommitMessages(diff string) ([]string, error) {
-	prompt := fmt.Sprintf(`Generate 5 clear commit messages for these code changes.
-Follow conventional commit format. Example format:
-feat: add new search functionality
-fix: resolve database connection issues
+	prompt := fmt.Sprintf(
+		`You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me, only reply with the raw generated commit message and don't include any explaination of context
 
 Code diff:
-%s`, diff)
+%s`,
+		diff,
+	)
 
-	reqBody, _ := json.Marshal(map[string]interface{}{
-		"model": modelName,
-		"messages": []map[string]string{
-			{"role": "user", "content": prompt},
-		},
-	})
+	resultChan := make(chan string, 5)
+	errChan := make(chan error, 5)
 
-	resp, err := makeAPIRequest(reqBody)
-	if err != nil {
-		return nil, err
+	for i := 0; i < 5; i++ {
+		go func() {
+			reqBody, _ := json.Marshal(map[string]interface{}{
+				"model": modelName,
+				"messages": []map[string]string{
+					{"role": "user", "content": prompt},
+				},
+			})
+
+			resp, err := makeAPIRequest(reqBody)
+			if err != nil {
+				errChan <- err
+				resultChan <- ""
+				return
+			}
+			defer resp.Body.Close()
+
+			var result struct {
+				Choices []struct {
+					Message struct {
+						Content string `json:"content"`
+					} `json:"message"`
+				} `json:"choices"`
+			}
+			if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+				errChan <- err
+				resultChan <- ""
+				return
+			}
+
+			if len(result.Choices) > 0 {
+				resultChan <- result.Choices[0].Message.Content
+			} else {
+				resultChan <- ""
+			}
+			errChan <- nil
+		}()
 	}
-	defer resp.Body.Close()
-
-	var result struct {
-		Choices []struct {
-			Message struct {
-				Content string `json:"content"`
-			} `json:"message"`
-		} `json:"choices"`
-	}
-	json.NewDecoder(resp.Body).Decode(&result)
 
 	var messages []string
-	for _, choice := range result.Choices {
-		messages = append(messages, choice.Message.Content)
+	var firstError error
+
+	for i := 0; i < 5; i++ {
+		msg := <-resultChan
+		err := <-errChan
+		if err != nil && firstError == nil {
+			firstError = err
+		}
+		if msg != "" {
+			messages = append(messages, msg)
+		}
 	}
+
+	if len(messages) == 0 && firstError != nil {
+		return nil, firstError
+	}
+
 	return messages, nil
 }
 
@@ -95,6 +129,7 @@ func selectMessage(messages []string) string {
 	var selection int
 	fmt.Scanln(&selection)
 
+	fmt.Printf("SELECTION: %d", selection)
 	if selection < 1 || selection > len(messages) {
 		return ""
 	}
