@@ -65,7 +65,11 @@ func getStagedDiff() (string, error) {
 
 func generateCommitMessages(ctx context.Context, diff string) ([]string, error) {
 	prompt := fmt.Sprintf(
-		`You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me, only reply with the raw generated commit message and don't include any explaination of context
+		`You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me following the rules below strictly
+
+        Rules: 
+        1. Only reply with the raw generated commit message
+        2. Don't wrap the message in code tags
 
 Code diff:
 %s`,
