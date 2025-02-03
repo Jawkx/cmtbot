@@ -8,7 +8,6 @@ import (
 	"github.com/charmbracelet/huh/spinner"
 	"net/http"
 	"os"
-	"os/exec"
 	"time"
 )
 
@@ -54,14 +53,6 @@ func main() {
 		fmt.Printf("Error committing: %v\n", err)
 		os.Exit(1)
 	}
-}
-
-func getStagedDiff() (string, error) {
-	cmd := exec.Command("git", "diff", "--staged")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	return out.String(), err
 }
 
 func generateCommitMessages(ctx context.Context, diff string) ([]string, error) {
@@ -162,13 +153,6 @@ func selectMessage(messages []string) string {
 		return ""
 	}
 	return messages[selection-1]
-}
-
-func commitChanges(message string) error {
-	cmd := exec.Command("git", "commit", "-m", message)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
 }
 
 func makeAPIRequest(body []byte) (*http.Response, error) {
