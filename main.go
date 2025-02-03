@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/charmbracelet/huh/spinner"
 	"os"
 	"time"
 )
@@ -24,16 +23,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	spinnerDone := make(chan bool)
-	go func() {
-		s := spinner.New().Title("Generating commit messages...").Context(ctx)
-		s.Run()
-		spinnerDone <- true
-	}()
-
 	messages, err := generateCommitMessages(ctx, diff, 5)
-	cancel()
-	<-spinnerDone
 
 	if err != nil {
 		fmt.Printf("Error generating messages: %v\n", err)
