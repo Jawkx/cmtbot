@@ -24,7 +24,6 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	var messages []string
 	spinnerDone := make(chan bool)
 	go func() {
 		s := spinner.New().Title("Generating commit messages...").Context(ctx)
@@ -32,7 +31,8 @@ func main() {
 		spinnerDone <- true
 	}()
 
-	messages, err = generateCommitMessages(ctx, diff, 5)
+	messages, err := generateCommitMessages(ctx, diff, 5)
+	cancel()
 	<-spinnerDone
 
 	if err != nil {
