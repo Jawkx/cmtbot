@@ -9,16 +9,22 @@ import (
 	"os"
 )
 
-func generateCommitMessages(ctx context.Context, diff string, numOfMessages int) ([]string, error) {
-	prompt := fmt.Sprintf(
-		`You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me following the rules below strictly
+const GENERATE_COMMIT_MESSAGE_PROMPT = `
+You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me following the rules below STRICTLY because the output will be consumed by another application
 
-        Rules: 
-        1. Only reply with the raw generated commit message
-        2. Don't wrap the message in code tags
+Rules: 
+    1. Only reply with the raw generated commit message
+    2. DON'T wrap the message in code tags
+    3. DON'T give any explanation on the commit message
 
 Code diff:
-%s`,
+%s
+`
+
+func generateCommitMessages(ctx context.Context, diff string, numOfMessages int) ([]string, error) {
+
+	prompt := fmt.Sprintf(
+		GENERATE_COMMIT_MESSAGE_PROMPT,
 		diff,
 	)
 
