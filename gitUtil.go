@@ -14,6 +14,14 @@ func getStagedDiff() (string, error) {
 	return out.String(), err
 }
 
+func getStagedFiles() (string, error) {
+	cmd := exec.Command("git", "diff", "--staged", "--name-status")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	return out.String(), err
+}
+
 func commitChanges(message string) error {
 	cmd := exec.Command("git", "commit", "-m", message)
 	cmd.Stdout = os.Stdout
