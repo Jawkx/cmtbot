@@ -14,6 +14,7 @@ import (
 
 const (
 	apiBase   = "https://openrouter.ai/api/v1/chat/completions"
+	apiKeyEnv = "OPENROUTER_API_KEY"
 	modelName = "deepseek/deepseek-r1-distill-qwen-32b"
 )
 
@@ -171,7 +172,7 @@ func commitChanges(message string) error {
 }
 
 func makeAPIRequest(body []byte) (*http.Response, error) {
-	apiKey := os.Getenv("OPENROUTER_API_KEY")
+	apiKey := os.Getenv(apiKeyEnv)
 
 	req, err := http.NewRequest("POST", apiBase, bytes.NewBuffer(body))
 	if err != nil {
