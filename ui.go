@@ -23,6 +23,14 @@ func getStyledFilenames(fileString string) string {
 	var editFileStyle = baseLabelStyle.Foreground(lipgloss.Color("3"))
 	var deleteFileStyle = baseLabelStyle.Foreground(lipgloss.Color("1"))
 
+	if fileString == "" {
+		return splitByLines(
+			titleStyle.Render("No staged files"),
+			"",
+			optionBlockStyle.Render("[q]uit"),
+		)
+	}
+
 	fileStrings := strings.Split(fileString, "\n")
 
 	var styledStagedFiles string
@@ -49,5 +57,7 @@ func getStyledFilenames(fileString string) string {
 		styledStagedFiles += styled + "\n"
 	}
 
-	return splitByLines(titleStyle.Render("Staged files:"), styledStagedFiles)
+	return splitByLines(titleStyle.Render("Staged files:"), styledStagedFiles,
+		optionBlockStyle.Render("[c]ontinue")+optionBlockStyle.Render("[q]uit"),
+	)
 }

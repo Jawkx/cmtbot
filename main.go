@@ -56,10 +56,7 @@ func (m model) View() string {
 	var content string
 
 	if m.state == SHOW_DIFF_STATE {
-		content = splitByLines(
-			getStyledFilenames(m.diffFiles),
-			optionBlockStyle.Render("[c]ontinue")+optionBlockStyle.Render("[q]uit"),
-		)
+		content = getStyledFilenames(m.diffFiles)
 	}
 
 	return "\n" + content
