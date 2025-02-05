@@ -56,7 +56,7 @@ func (m model) View() string {
 	var content string
 
 	if m.state == SHOW_DIFF_STATE {
-		content = getStyledFilenames(m.diffFiles)
+		content = stagedFilesUi(m.diffFiles)
 	}
 
 	return "\n" + content

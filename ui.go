@@ -6,25 +6,32 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var optionBlockStyle = lipgloss.NewStyle().
-	Background(lipgloss.Color("4")).
-	Foreground(lipgloss.Color("0")).Margin(0, 1)
+const (
+	StatusAdd    = "A"
+	StatusModify = "M"
+	StatusDelete = "D"
+)
 
-func splitByLines(lines ...string) string {
+var (
+	optionBlockStyle = lipgloss.NewStyle().
+				Background(lipgloss.Color("4")).
+				Foreground(lipgloss.Color("0")).Margin(0, 1)
+
+	titleStyle = lipgloss.NewStyle().MarginLeft(3)
+
+	baseLabelStyle  = lipgloss.NewStyle().Width(6).MarginLeft(6).MarginRight(2)
+	newFileStyle    = baseLabelStyle.Foreground(lipgloss.Color("2"))
+	editFileStyle   = baseLabelStyle.Foreground(lipgloss.Color("3"))
+	deleteFileStyle = baseLabelStyle.Foreground(lipgloss.Color("1"))
+)
+
+func joinLines(lines ...string) string {
 	return strings.Join(lines, "\n")
 }
 
-func getStyledFilenames(fileString string) string {
-
-	var titleStyle = lipgloss.NewStyle().MarginLeft(3)
-	var baseLabelStyle = lipgloss.NewStyle().Width(6).MarginLeft(6)
-
-	var newFileStyle = baseLabelStyle.Foreground(lipgloss.Color("2"))
-	var editFileStyle = baseLabelStyle.Foreground(lipgloss.Color("3"))
-	var deleteFileStyle = baseLabelStyle.Foreground(lipgloss.Color("1"))
-
+func stagedFilesUi(fileString string) string {
 	if fileString == "" {
-		return splitByLines(
+		return joinLines(
 			titleStyle.Render("No staged files"),
 			"",
 			optionBlockStyle.Render("[q]uit"),
@@ -32,8 +39,7 @@ func getStyledFilenames(fileString string) string {
 	}
 
 	fileStrings := strings.Split(fileString, "\n")
-
-	var styledStagedFiles string
+	var builder strings.Builder
 
 	for _, line := range fileStrings {
 		parts := strings.SplitN(line, "\t", 2)
@@ -44,20 +50,22 @@ func getStyledFilenames(fileString string) string {
 
 		var styled string
 		switch status {
-		case "A":
+		case StatusAdd:
 			styled = newFileStyle.Render("Add") + fileName
-		case "M":
-			styled = editFileStyle.Render("Edit") + fileName
-		case "D":
+		case StatusModify:
+			styled = editFileStyle.Render("Modify") + fileName
+		case StatusDelete:
 			styled = deleteFileStyle.Render("Delete") + fileName
 		default:
 			styled = line
 		}
 
-		styledStagedFiles += styled + "\n"
+		builder.WriteString(styled + "\n")
 	}
 
-	return splitByLines(titleStyle.Render("Staged files:"), styledStagedFiles,
+	return joinLines(
+		titleStyle.Render("Staged files:"),
+		builder.String(),
 		optionBlockStyle.Render("[c]ontinue")+optionBlockStyle.Render("[q]uit"),
 	)
 }
