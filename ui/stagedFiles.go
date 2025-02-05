@@ -1,4 +1,4 @@
-package main
+package ui
 
 import (
 	"strings"
@@ -25,11 +25,7 @@ var (
 	deleteFileStyle = baseLabelStyle.Foreground(lipgloss.Color("1"))
 )
 
-func joinLines(lines ...string) string {
-	return strings.Join(lines, "\n")
-}
-
-func stagedFilesUi(fileString string) string {
+func StagedFiles(fileString string) string {
 	if fileString == "" {
 		return joinLines(
 			titleStyle.Render("No staged files"),

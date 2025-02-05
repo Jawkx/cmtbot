@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Jawkx/cmtbot/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -56,7 +57,7 @@ func (m model) View() string {
 	var content string
 
 	if m.state == SHOW_DIFF_STATE {
-		content = stagedFilesUi(m.diffFiles)
+		content = ui.StagedFiles(m.diffFiles)
 	}
 
 	return "\n" + content
