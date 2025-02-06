@@ -15,6 +15,14 @@ type LlmService struct {
 	modelName string
 }
 
+func NewLlmService(apiBase, apiKeyEnv, modelName string) *LlmService {
+	return &LlmService{
+		apiBase,
+		apiKeyEnv,
+		modelName,
+	}
+}
+
 func (s *LlmService) generateCommitMessages(
 	ctx context.Context,
 	diff string,
