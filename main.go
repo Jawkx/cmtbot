@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Jawkx/cmtbot/llm"
 	"github.com/Jawkx/cmtbot/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -15,20 +16,28 @@ const (
 )
 
 const (
-	SHOW_DIFF_STATE      = "show_diff"
-	SHOW_FULL_DIFF_STATE = "show_full_diff"
+	SHOW_DIFF_STATE       = "show_diff"
+	GENERATE_COMMIT_STATE = "generate_commit"
 )
 
 type model struct {
 	state     string
 	diffFiles string
+	diff      string
+	// services
+	llmService *llm.LlmService
 }
 
 func initialModel() model {
 	diffFiles, _ := getStagedFiles()
+	diff, _ := getStagedDiff()
+	llmService := llm.NewLlmService(apiBase, apiKeyEnv, modelName)
+
 	return model{
-		state:     SHOW_DIFF_STATE,
-		diffFiles: diffFiles,
+		state:      SHOW_DIFF_STATE,
+		diffFiles:  diffFiles,
+		diff:       diff,
+		llmService: llmService,
 	}
 }
 
@@ -42,11 +51,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 
 		switch msg.String() {
-
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		}
-
 		return m, nil
 	}
 
