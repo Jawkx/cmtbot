@@ -123,6 +123,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 
+		case "j", "down":
+			if m.state == SELECT_COMMIT_STATE {
+				m.cursor++
+				if m.cursor >= len(m.messages) {
+					m.cursor = 0
+				}
+			}
+
+		case "k", "up":
+			if m.state == SELECT_COMMIT_STATE {
+				m.cursor--
+				if m.cursor < 0 {
+					m.cursor = len(m.messages) - 1
+				}
+			}
+
 		case "c":
 			if m.state == SHOW_DIFF_STATE {
 				m.state = GENERATING_COMMIT_STATE

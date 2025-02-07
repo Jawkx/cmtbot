@@ -8,9 +8,9 @@ import (
 
 func SelectCommit(commits []string, cursor int) string {
 	var (
-		listWidth = 20
-		boxWidth  = 30
-		listStyle = lipgloss.NewStyle().Width(listWidth).Padding(0, 1)
+		listWidth = 35
+		boxWidth  = 45
+		listStyle = lipgloss.NewStyle().Width(listWidth).Margin(0, 2)
 		boxStyle  = lipgloss.NewStyle().
 				Width(boxWidth).
 				Padding(0, 1).
@@ -23,6 +23,11 @@ func SelectCommit(commits []string, cursor int) string {
 	for i, commit := range commits {
 		lines := strings.SplitN(commit, "\n", 2)
 		firstLine := lines[0]
+
+		if len(firstLine) > listWidth-len(cursorChar) {
+			firstLine = firstLine[:listWidth-3-len(cursorChar)] + "..."
+		}
+
 		if i == cursor {
 			listItems[i] = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("205")).
