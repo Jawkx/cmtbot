@@ -2,7 +2,6 @@ package llm
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -24,7 +23,6 @@ func NewLlmService(apiBase, apiKeyEnv, modelName string) *LlmService {
 }
 
 func (s *LlmService) generateCommitMessages(
-	ctx context.Context,
 	diff string,
 	numOfMessages int,
 ) ([]string, error) {
@@ -34,71 +32,40 @@ func (s *LlmService) generateCommitMessages(
 		diff,
 	)
 
-	resultChan := make(chan string, numOfMessages)
-	errChan := make(chan error, numOfMessages)
-
+	messages := make([]string, 0, numOfMessages)
 	for i := 0; i < numOfMessages; i++ {
-		go func() {
-			select {
-			case <-ctx.Done():
-				errChan <- ctx.Err()
-				resultChan <- ""
-				return
-			default:
-				reqBody, _ := json.Marshal(map[string]interface{}{
-					"model": s.modelName,
-					"messages": []map[string]string{
-						{"role": "user", "content": prompt},
-					},
-				})
-
-				resp, err := s.makeAPIRequest(reqBody)
-				if err != nil {
-					errChan <- err
-					resultChan <- ""
-					return
-				}
-				defer resp.Body.Close()
-
-				var result struct {
-					Choices []struct {
-						Message struct {
-							Content string `json:"content"`
-						} `json:"message"`
-					} `json:"choices"`
-				}
-				if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-					errChan <- err
-					resultChan <- ""
-					return
-				}
-
-				if len(result.Choices) > 0 {
-					resultChan <- result.Choices[0].Message.Content
-				} else {
-					resultChan <- ""
-				}
-				errChan <- nil
-			}
-		}()
-	}
-
-	var messages []string
-	var firstError error
-
-	for i := 0; i < numOfMessages; i++ {
-		msg := <-resultChan
-		err := <-errChan
-		if err != nil && firstError == nil {
-			firstError = err
+		reqBody, err := json.Marshal(map[string]interface{}{
+			"model":    s.modelName,
+			"messages": []map[string]string{{"role": "user", "content": prompt}},
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal request body: %w", err)
 		}
-		if msg != "" {
-			messages = append(messages, msg)
+
+		resp, err := s.makeAPIRequest(reqBody)
+		if err != nil {
+			return nil, fmt.Errorf("API request failed: %w", err)
+		}
+		defer resp.Body.Close()
+
+		var result struct {
+			Choices []struct {
+				Message struct {
+					Content string `json:"content"`
+				} `json:"message"`
+			} `json:"choices"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+			return nil, fmt.Errorf("failed to decode response body: %w", err)
+		}
+
+		if len(result.Choices) > 0 {
+			messages = append(messages, result.Choices[0].Message.Content)
 		}
 	}
 
-	if len(messages) == 0 && firstError != nil {
-		return nil, firstError
+	if len(messages) == 0 {
+		return nil, fmt.Errorf("no commit messages generated")
 	}
 
 	return messages, nil
