@@ -48,7 +48,6 @@ func LoadConfig() (Config, error) {
 
 	_, err = os.Stat(configPath)
 	if os.IsNotExist(err) {
-		// File does not exist, return default config
 		return Config{
 			ApiBase:   "https://openrouter.ai/api/v1/chat/completions",
 			ApiKeyEnv: "OPENROUTER_API_KEY",
@@ -160,7 +159,7 @@ func (m model) View() string {
 		if m.err != nil {
 			content = fmt.Sprintf("Error: %v", m.err)
 		} else {
-			content = "SELECT COMMIT MESSAGE"
+			content = ui.SelectCommit(m.messages, m.cursor)
 		}
 	}
 
