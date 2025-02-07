@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+
 	"os"
 )
 
@@ -22,7 +24,7 @@ func NewLlmService(apiBase, apiKeyEnv, modelName string) *LlmService {
 	}
 }
 
-func (s *LlmService) generateCommitMessages(
+func (s *LlmService) GenerateCommitMessages(
 	diff string,
 	numOfMessages int,
 ) ([]string, error) {
@@ -33,35 +35,55 @@ func (s *LlmService) generateCommitMessages(
 	)
 
 	messages := make([]string, 0, numOfMessages)
+	errChan := make(chan error, numOfMessages)
+	resultChan := make(chan string, numOfMessages)
+
 	for i := 0; i < numOfMessages; i++ {
-		reqBody, err := json.Marshal(map[string]interface{}{
-			"model":    s.modelName,
-			"messages": []map[string]string{{"role": "user", "content": prompt}},
-		})
+		go func() {
+			reqBody, err := json.Marshal(map[string]interface{}{
+				"model":    s.modelName,
+				"messages": []map[string]string{{"role": "user", "content": prompt}},
+			})
+			if err != nil {
+				errChan <- fmt.Errorf("failed to marshal request body: %w", err)
+				return
+			}
+
+			resp, err := s.makeAPIRequest(reqBody)
+			if err != nil {
+				errChan <- fmt.Errorf("API request failed: %w", err)
+				return
+			}
+			defer resp.Body.Close()
+
+			var result struct {
+				Choices []struct {
+					Message struct {
+						Content string `json:"content"`
+					} `json:"message"`
+				} `json:"choices"`
+			}
+			if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+				errChan <- fmt.Errorf("failed to decode response body: %w", err)
+				return
+			}
+
+			if len(result.Choices) > 0 {
+				resultChan <- result.Choices[0].Message.Content
+				errChan <- nil // Signal success
+				return
+			}
+			errChan <- fmt.Errorf("no choices returned")
+		}()
+	}
+
+	for i := 0; i < numOfMessages; i++ {
+		err := <-errChan
 		if err != nil {
-			return nil, fmt.Errorf("failed to marshal request body: %w", err)
+			return nil, err
 		}
-
-		resp, err := s.makeAPIRequest(reqBody)
-		if err != nil {
-			return nil, fmt.Errorf("API request failed: %w", err)
-		}
-		defer resp.Body.Close()
-
-		var result struct {
-			Choices []struct {
-				Message struct {
-					Content string `json:"content"`
-				} `json:"message"`
-			} `json:"choices"`
-		}
-		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-			return nil, fmt.Errorf("failed to decode response body: %w", err)
-		}
-
-		if len(result.Choices) > 0 {
-			messages = append(messages, result.Choices[0].Message.Content)
-		}
+		message := <-resultChan
+		messages = append(messages, message)
 	}
 
 	if len(messages) == 0 {
@@ -73,7 +95,8 @@ func (s *LlmService) generateCommitMessages(
 
 func (s *LlmService) makeAPIRequest(body []byte) (*http.Response, error) {
 	apiKey := os.Getenv(s.apiKeyEnv)
-
+	log.Printf("Making API request to: %s", s.apiBase)
+	log.Printf("Using model: %s", s.modelName)
 	req, err := http.NewRequest("POST", s.apiBase, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
