@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"os"
@@ -95,8 +94,6 @@ func (s *LlmService) GenerateCommitMessages(
 
 func (s *LlmService) makeAPIRequest(body []byte) (*http.Response, error) {
 	apiKey := os.Getenv(s.apiKeyEnv)
-	log.Printf("Making API request to: %s", s.apiBase)
-	log.Printf("Using model: %s", s.modelName)
 	req, err := http.NewRequest("POST", s.apiBase, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
