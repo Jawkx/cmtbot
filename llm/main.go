@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
 	"os"
+	"strings"
 )
 
 type LlmService struct {
@@ -87,6 +87,10 @@ func (s *LlmService) GenerateCommitMessages(
 
 	if len(messages) == 0 {
 		return nil, fmt.Errorf("no commit messages generated")
+	}
+
+	for idx, message := range messages {
+		messages[idx] = strings.TrimSpace(message)
 	}
 
 	return messages, nil
