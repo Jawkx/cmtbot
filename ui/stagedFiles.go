@@ -17,21 +17,23 @@ var (
 				Background(lipgloss.Color("4")).
 				Foreground(lipgloss.Color("0")).Margin(0, 1)
 
-	titleStyle = lipgloss.NewStyle().MarginLeft(3)
+	titleStyle     = lipgloss.NewStyle().MarginBottom(1).Foreground(lipgloss.Color("205"))
+	containerStyle = lipgloss.NewStyle().MarginLeft(3)
 
-	baseLabelStyle  = lipgloss.NewStyle().Width(6).MarginLeft(6).MarginRight(2)
+	baseLabelStyle  = lipgloss.NewStyle().Width(6).Margin(0, 2)
 	newFileStyle    = baseLabelStyle.Foreground(lipgloss.Color("2"))
 	editFileStyle   = baseLabelStyle.Foreground(lipgloss.Color("3"))
-	deleteFileStyle = baseLabelStyle.Foreground(lipgloss.Color("1"))
+	deleteFileStyle = baseLabelStyle.Foreground(lipgloss.Color("201"))
+	legendsStyle    = lipgloss.NewStyle().Faint(true).PaddingRight(1)
 )
 
 func StagedFiles(fileString string) string {
 	if fileString == "" {
-		return joinLines(
+		return containerStyle.Render(lipgloss.JoinVertical(
+			lipgloss.Left,
 			titleStyle.Render("No staged files"),
-			"",
-			optionBlockStyle.Render("[q]uit"),
-		)
+			legendsStyle.Render("q: quit"),
+		))
 	}
 
 	fileStrings := strings.Split(fileString, "\n")
@@ -59,9 +61,10 @@ func StagedFiles(fileString string) string {
 		builder.WriteString(styled + "\n")
 	}
 
-	return joinLines(
+	return containerStyle.Render(lipgloss.JoinVertical(
+		lipgloss.Left,
 		titleStyle.Render("Staged files:"),
 		builder.String(),
-		optionBlockStyle.Render("[c]ontinue")+optionBlockStyle.Render("[q]uit"),
-	)
+		legendsStyle.Render("c: continue, q/ctrl+c: quit"),
+	))
 }
