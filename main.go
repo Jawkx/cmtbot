@@ -17,6 +17,8 @@ const (
 	SHOW_DIFF_STATE         = "show_diff"
 	GENERATING_COMMIT_STATE = "generating_commit_state"
 	SELECT_COMMIT_STATE     = "select_commit_state"
+	COMMITING_RESULT_STATE  = "commiting_result_state"
+	COMMITED_CHANGES_STATE  = "commited_changes_state"
 )
 
 type Config struct {
@@ -99,6 +101,10 @@ type commitMsgsResultMsg struct {
 	err      error
 }
 
+type commitChangesResultMsg struct {
+	err error
+}
+
 func (m model) Init() tea.Cmd {
 	return m.spinner.Tick
 }
@@ -115,6 +121,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.state = SELECT_COMMIT_STATE
 		m.messages = msg.messages
 		m.err = msg.err
+		return m, nil
+
+	case commitChangesResultMsg:
+		m.state = COMMITED_CHANGES_STATE
+		m.err = msg.err
+
 		return m, nil
 
 	case tea.KeyMsg:
@@ -146,6 +158,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cfg, _ := LoadConfig()
 				return m, generateCommitMessagesCmd(m.llmService, m.diff, cfg.NumOfMsg)
 			}
+
+		case "enter":
+			if m.state == SELECT_COMMIT_STATE {
+				m.state = COMMITING_RESULT_STATE
+				return m, commitChangesCmd(m.messages[m.cursor])
+			}
 		}
 
 		return m, nil
@@ -158,6 +176,13 @@ func generateCommitMessagesCmd(llmService *llm.LlmService, diff string, numOfMsg
 	return func() tea.Msg {
 		messages, err := llmService.GenerateCommitMessages(diff, numOfMsg)
 		return commitMsgsResultMsg{messages: messages, err: err}
+	}
+}
+
+func commitChangesCmd(message string) tea.Cmd {
+	return func() tea.Msg {
+		err := commitChanges(message)
+		return commitChangesResultMsg{err: err}
 	}
 }
 
@@ -177,6 +202,18 @@ func (m model) View() string {
 			content = fmt.Sprintf("Error: %v", m.err)
 		} else {
 			content = ui.SelectCommit(m.messages, m.cursor)
+		}
+	}
+
+	if m.state == COMMITING_RESULT_STATE {
+		content = "  " + m.spinner.View() + "Commiting changes..."
+	}
+
+	if m.state == COMMITED_CHANGES_STATE {
+		if m.err != nil {
+			content = fmt.Sprintf("Error: %v", m.err)
+		} else {
+			content = "Commited Changes"
 		}
 	}
 
