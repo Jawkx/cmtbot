@@ -9,6 +9,7 @@ import (
 	"github.com/Jawkx/cmtbot/ui"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -80,7 +81,7 @@ func initialModel() model {
 	diffFiles, _ := getStagedFiles()
 	diff, _ := getStagedDiff()
 	llmService := llm.NewLlmService(cfg.ApiBase, cfg.ApiKeyEnv, cfg.ModelName)
-	s := spinner.New()
+	s := spinner.New(spinner.WithStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("205"))))
 	s.Spinner = spinner.Dot
 
 	return model{
