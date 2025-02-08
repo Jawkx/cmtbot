@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"math"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -12,9 +13,8 @@ func SelectCommit(commits []string, cursor int) string {
 		boxWidth  = 55
 		listStyle = lipgloss.NewStyle().Width(listWidth).Margin(0, 2)
 		boxStyle  = lipgloss.NewStyle().
-				Width(boxWidth).
 				Padding(0, 1).
-				BorderStyle(lipgloss.RoundedBorder()).
+				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(lipgloss.Color("63"))
 		cursorChar   = "> "
 		legendsStyle = lipgloss.NewStyle().Faint(true).MarginLeft(4)
@@ -39,14 +39,17 @@ func SelectCommit(commits []string, cursor int) string {
 	}
 
 	list := lipgloss.JoinVertical(lipgloss.Left, listItems...)
+	boxHeight := calculateMaxHeight(commits, boxWidth)
+
 	var boxContent string
+
 	if len(commits) > 0 {
 		boxContent = commits[cursor]
 	} else {
 		boxContent = "No commits."
 	}
 
-	box := boxStyle.Render(boxContent)
+	box := boxStyle.Width(boxWidth).Height(boxHeight).Render(boxContent)
 
 	header := legendsStyle.Render("(↑/↓: arrows, j/k: move, enter: select)")
 
@@ -59,4 +62,29 @@ func SelectCommit(commits []string, cursor int) string {
 	)
 
 	return ui
+}
+
+func calculateMaxHeight(commits []string, maxWidth int) int {
+	var maxHeight int
+
+	for _, commit := range commits {
+		var commitHeight int
+		lines := strings.Split(commit, "\n")
+
+		for _, line := range lines {
+			lineLen := len(line)
+
+			if lineLen != 0 {
+				commitHeight = commitHeight + int(math.Ceil(float64(maxWidth)/float64(lineLen)))
+			}
+			commitHeight = commitHeight + 1
+		}
+
+		if commitHeight > maxHeight {
+			maxHeight = commitHeight
+		}
+
+	}
+
+	return maxHeight
 }
