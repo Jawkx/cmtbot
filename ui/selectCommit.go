@@ -8,18 +8,19 @@ import (
 
 func SelectCommit(commits []string, cursor int) string {
 	var (
-		listWidth = 35
-		boxWidth  = 45
+		listWidth = 45
+		boxWidth  = 55
 		listStyle = lipgloss.NewStyle().Width(listWidth).Margin(0, 2)
 		boxStyle  = lipgloss.NewStyle().
 				Width(boxWidth).
 				Padding(0, 1).
 				BorderStyle(lipgloss.RoundedBorder()).
 				BorderForeground(lipgloss.Color("63"))
-		cursorChar = "> "
+		cursorChar   = "> "
+		legendsStyle = lipgloss.NewStyle().Faint(true).MarginLeft(4)
 	)
 
-	listItems := make([]string, len(commits))
+	listItems := make([]string, len(commits)+3)
 	for i, commit := range commits {
 		lines := strings.SplitN(commit, "\n", 2)
 		firstLine := lines[0]
@@ -44,9 +45,18 @@ func SelectCommit(commits []string, cursor int) string {
 	} else {
 		boxContent = "No commits."
 	}
+
 	box := boxStyle.Render(boxContent)
 
-	ui := lipgloss.JoinHorizontal(lipgloss.Top, listStyle.Render(list), box)
+	header := legendsStyle.Render("(↑/↓: arrows, j/k: move, enter: select)")
+
+	content := lipgloss.JoinHorizontal(lipgloss.Top, listStyle.Render(list), box)
+
+	ui := lipgloss.JoinVertical(
+		lipgloss.Left,
+		header,
+		content,
+	)
 
 	return ui
 }
