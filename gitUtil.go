@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"os"
 	"os/exec"
 )
 
@@ -24,7 +23,12 @@ func getStagedFiles() (string, error) {
 
 func commitChanges(message string) error {
 	cmd := exec.Command("git", "commit", "-m", message)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	var outb, errb bytes.Buffer
+	cmd.Stdout = &outb
+	cmd.Stderr = &errb
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }
