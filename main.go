@@ -13,12 +13,14 @@ import (
 	"github.com/pelletier/go-toml/v2"
 )
 
+type State int
+
 const (
-	SHOW_DIFF_STATE         = "show_diff"
-	GENERATING_COMMIT_STATE = "generating_commit_state"
-	SELECT_COMMIT_STATE     = "select_commit_state"
-	COMMITING_RESULT_STATE  = "commiting_result_state"
-	COMMITED_CHANGES_STATE  = "commited_changes_state"
+	SHOW_DIFF_STATE State = iota
+	GENERATING_COMMIT_STATE
+	SELECT_COMMIT_STATE
+	COMMITING_RESULT_STATE
+	COMMITED_CHANGES_STATE
 )
 
 type Config struct {
@@ -29,7 +31,7 @@ type Config struct {
 }
 
 type model struct {
-	state     string
+	state     State
 	diffFiles string
 	diff      string
 	err       error
