@@ -213,7 +213,7 @@ func (m model) View() string {
 		if m.err != nil {
 			content = fmt.Sprintf("Error: %v", m.err)
 		} else {
-			content = "Commited Changes"
+			content = lipgloss.NewStyle().Background(lipgloss.Color("1")).Render("Commited Changes")
 		}
 	}
 
