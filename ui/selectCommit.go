@@ -8,9 +8,21 @@ import (
 )
 
 func SelectCommit(commits []string, cursor int, viewportWidth int) string {
+
 	var (
-		listWidth = 50
-		boxWidth  = 50
+		listWidth = viewportWidth/2 - 2
+		boxWidth  = viewportWidth/2 - 2
+	)
+
+	var isVertical bool
+
+	if listWidth < 35 {
+		isVertical = true
+		listWidth = viewportWidth - 4
+		boxWidth = viewportWidth - 4
+	}
+
+	var (
 		boxHeight = calculateMaxHeight(commits, boxWidth-2)
 		listStyle = lipgloss.NewStyle().
 				Width(listWidth).
@@ -18,6 +30,7 @@ func SelectCommit(commits []string, cursor int, viewportWidth int) string {
 		boxStyle = lipgloss.NewStyle().
 				Padding(0, 1).
 				MarginLeft(1).
+				Width(boxWidth).Height(boxHeight).
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(lipgloss.Color("63"))
 		cursorChar     = "> "
@@ -55,14 +68,15 @@ func SelectCommit(commits []string, cursor int, viewportWidth int) string {
 		boxContent = "No commits."
 	}
 
-	box := boxStyle.Width(boxWidth).Height(boxHeight).Render(boxContent)
+	box := boxStyle.Render(boxContent)
 
-	content := lipgloss.JoinHorizontal(lipgloss.Top, listWithLegends, box)
+	var ui string
 
-	ui := lipgloss.JoinVertical(
-		lipgloss.Left,
-		content,
-	)
+	if isVertical {
+		ui = lipgloss.JoinVertical(lipgloss.Center, box, listWithLegends)
+	} else {
+		ui = lipgloss.JoinHorizontal(lipgloss.Top, listWithLegends, box)
+	}
 
 	return ui
 }
