@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"os/exec"
+	"strings"
 )
 
 func getStagedDiff() (string, error) {
@@ -32,7 +33,7 @@ func commitChanges(message string) (string, error) {
 		return "", err
 	}
 
-	output := outb.String()
+	output := strings.TrimSpace(outb.String())
 
 	return output, nil
 }
