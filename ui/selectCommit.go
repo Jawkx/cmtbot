@@ -38,7 +38,7 @@ func SelectCommit(commits []string, cursor int, viewportWidth int) string {
 		legendsStyle   = lipgloss.NewStyle().Faint(true).PaddingLeft(len(cursorChar))
 	)
 
-	legends := legendsStyle.Render("(↑/↓: arrows, j/k: move, enter: select)")
+	legends := legendsStyle.Render("(↑/↓;j/k: move, enter: select, q: quit)")
 	listItems := make([]string, len(commits))
 	for i, commit := range commits {
 		lines := strings.SplitN(commit, "\n", 2)
