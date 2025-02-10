@@ -28,6 +28,7 @@ type Config struct {
 	ApiKeyEnv string `toml:"api_key_env"`
 	ModelName string `toml:"model_name"`
 	NumOfMsg  int    `toml:"num_of_msg"`
+	Prompt    string `toml:"prompt"`
 }
 
 type model struct {
@@ -84,7 +85,7 @@ func initialModel() model {
 
 	diffFiles, _ := getStagedFiles()
 	diff, _ := getStagedDiff()
-	llmService := llm.NewLlmService(cfg.ApiBase, cfg.ApiKeyEnv, cfg.ModelName)
+	llmService := llm.NewLlmService(cfg.ApiBase, cfg.ApiKeyEnv, cfg.ModelName, cfg.Prompt)
 	s := spinner.New(spinner.WithStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("205"))))
 	s.Spinner = spinner.Dot
 

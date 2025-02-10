@@ -13,13 +13,15 @@ type LlmService struct {
 	apiBase   string
 	apiKeyEnv string
 	modelName string
+	prompt    string
 }
 
-func NewLlmService(apiBase, apiKeyEnv, modelName string) *LlmService {
+func NewLlmService(apiBase, apiKeyEnv, modelName, prompt string) *LlmService {
 	return &LlmService{
 		apiBase,
 		apiKeyEnv,
 		modelName,
+		prompt,
 	}
 }
 
@@ -28,10 +30,11 @@ func (s *LlmService) GenerateCommitMessages(
 	numOfMessages int,
 ) ([]string, error) {
 
-	prompt := fmt.Sprintf(
-		GENERATE_COMMIT_MESSAGE_PROMPT,
-		diff,
-	)
+	var promptStringBuilder strings.Builder
+	promptStringBuilder.WriteString(s.prompt)
+	promptStringBuilder.WriteString("Diff:")
+	promptStringBuilder.WriteString(diff)
+	prompt := promptStringBuilder.String()
 
 	messages := make([]string, 0, numOfMessages)
 	errChan := make(chan error, numOfMessages)
