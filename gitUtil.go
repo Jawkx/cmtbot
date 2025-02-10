@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"os/exec"
-	"strings"
 )
 
 func getStagedDiff() (string, error) {
@@ -33,21 +32,7 @@ func commitChanges(message string) (string, error) {
 		return "", err
 	}
 
-	// Extract commit hash from the output
 	output := outb.String()
-	if strings.Contains(output, "nothing to commit") {
-		return "", nil // Or an error if you prefer
-	}
 
-	commitHashLine := strings.SplitN(output, "\n", 2)[0]
-
-	startIndex := strings.Index(commitHashLine, "[")
-	endIndex := strings.Index(commitHashLine, "]")
-
-	if startIndex == -1 || endIndex == -1 {
-		return "", nil // Or an error if you prefer
-	}
-
-	commitHash := commitHashLine[startIndex+1 : endIndex]
-	return commitHash, nil
+	return output, nil
 }

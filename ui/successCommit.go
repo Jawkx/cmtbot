@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"fmt"
-
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -18,7 +16,7 @@ func SuccessCommit(commitHash string) string {
 		lipgloss.JoinVertical(
 			lipgloss.Left,
 			titleStyle.Render("Successfully commited diff"),
-			messageStyle.Render(fmt.Sprintf("hash: %s", commitHash)),
+			messageStyle.Render(commitHash),
 			legendsStyle.Render("q: quit"),
 		),
 	)
