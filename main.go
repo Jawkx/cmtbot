@@ -37,6 +37,9 @@ type model struct {
 	diff      string
 	err       error
 
+	width  int
+	height int
+
 	messages []string
 	cursor   int
 	// services
@@ -114,6 +117,11 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
+		return m, nil
 
 	case spinner.TickMsg:
 		var cmd tea.Cmd
@@ -204,7 +212,7 @@ func (m model) View() string {
 		if m.err != nil {
 			content = fmt.Sprintf("Error: %v", m.err)
 		} else {
-			content = ui.SelectCommit(m.messages, m.cursor)
+			content = ui.SelectCommit(m.messages, m.cursor, m.width)
 		}
 	}
 
