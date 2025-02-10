@@ -21,4 +21,13 @@ api_base = "https://openrouter.ai/api/v1/chat/completions" # Open Ai compatible 
 api_key_env = "OPENROUTER_API_KEY" # Access token that will be called in the Bearer Token
 model_name = "google/gemini-2.0-flash-001" # model name
 num_of_msg = 4 # number of message generated for you to choose on
+prompt = """
+Given the git diff listed below, please generate a commit message for me following the rules below STRICTLY because the output will be consumed by another application that expect certain format
+
+Rules: 
+    1. Only reply with the raw generated commit message
+    2. DON'T wrap the message in code tags
+    3. DON'T give any explanation on the commit message
+    4. Follow the template closely
+"""
 ```
