@@ -7,31 +7,32 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func SelectCommit(commits []string, cursor int) string {
+func SelectCommit(commits []string, cursor int, viewportWidth int) string {
 	var (
 		listWidth = 50
 		boxWidth  = 50
 		boxHeight = calculateMaxHeight(commits, boxWidth-2)
 		listStyle = lipgloss.NewStyle().
 				Width(listWidth).
-				Height(boxHeight).
 				PaddingTop(1)
 		boxStyle = lipgloss.NewStyle().
 				Padding(0, 1).
 				MarginLeft(1).
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(lipgloss.Color("63"))
-		cursorChar   = "> "
-		legendsStyle = lipgloss.NewStyle().Faint(true).PaddingRight(1)
+		cursorChar     = "> "
+		truncateString = "..."
+		legendsStyle   = lipgloss.NewStyle().Faint(true).PaddingLeft(len(cursorChar))
 	)
 
+	legends := legendsStyle.Render("(↑/↓: arrows, j/k: move, enter: select)")
 	listItems := make([]string, len(commits))
 	for i, commit := range commits {
 		lines := strings.SplitN(commit, "\n", 2)
 		firstLine := lines[0]
 
 		if len(firstLine) > listWidth-len(cursorChar) {
-			firstLine = firstLine[:listWidth-3-len(cursorChar)] + "..."
+			firstLine = firstLine[:listWidth-len(truncateString)-len(cursorChar)] + truncateString
 		}
 
 		if i == cursor {
@@ -43,10 +44,8 @@ func SelectCommit(commits []string, cursor int) string {
 		}
 	}
 
-	legends := legendsStyle.Render("(↑/↓: arrows, j/k: move, enter: select)")
-
 	list := listStyle.Render(lipgloss.JoinVertical(lipgloss.Left, listItems...))
-	listWithLegends := lipgloss.JoinVertical(lipgloss.Right, list, legends)
+	listWithLegends := lipgloss.JoinVertical(lipgloss.Left, list, legends)
 
 	var boxContent string
 
