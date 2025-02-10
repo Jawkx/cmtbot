@@ -40,6 +40,14 @@ func commitChanges(message string) (string, error) {
 	}
 
 	commitHashLine := strings.SplitN(output, "\n", 2)[0]
-	commitHash := strings.SplitN(commitHashLine, " ", 2)[1]
+
+	startIndex := strings.Index(commitHashLine, "[")
+	endIndex := strings.Index(commitHashLine, "]")
+
+	if startIndex == -1 || endIndex == -1 {
+		return "", nil // Or an error if you prefer
+	}
+
+	commitHash := commitHashLine[startIndex+1 : endIndex]
 	return commitHash, nil
 }
