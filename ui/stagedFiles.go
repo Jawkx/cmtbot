@@ -23,7 +23,7 @@ var (
 	baseLabelStyle  = lipgloss.NewStyle().Width(6).Margin(0, 2)
 	newFileStyle    = baseLabelStyle.Foreground(lipgloss.Color("2"))
 	editFileStyle   = baseLabelStyle.Foreground(lipgloss.Color("3"))
-	deleteFileStyle = baseLabelStyle.Foreground(lipgloss.Color("201"))
+	deleteFileStyle = baseLabelStyle.Foreground(lipgloss.Color("1"))
 	legendsStyle    = lipgloss.NewStyle().Faint(true).PaddingRight(1)
 )
 
