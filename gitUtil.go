@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"os/exec"
+	"strings"
 )
 
 func getStagedDiff() (string, error) {
@@ -21,14 +22,24 @@ func getStagedFiles() (string, error) {
 	return out.String(), err
 }
 
-func commitChanges(message string) error {
+func commitChanges(message string) (string, error) {
 	cmd := exec.Command("git", "commit", "-m", message)
 	var outb, errb bytes.Buffer
 	cmd.Stdout = &outb
 	cmd.Stderr = &errb
 	err := cmd.Run()
+
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	// Extract commit hash from the output
+	output := outb.String()
+	if strings.Contains(output, "nothing to commit") {
+		return "", nil // Or an error if you prefer
+	}
+
+	commitHashLine := strings.SplitN(output, "\n", 2)[0]
+	commitHash := strings.SplitN(commitHashLine, " ", 2)[1]
+	return commitHash, nil
 }

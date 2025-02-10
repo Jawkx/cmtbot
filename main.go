@@ -40,8 +40,10 @@ type model struct {
 	width  int
 	height int
 
-	messages []string
-	cursor   int
+	messages          []string
+	cursor            int
+	succeedCommitHash string
+
 	// services
 	llmService *llm.LlmService
 	spinner    spinner.Model
@@ -108,7 +110,8 @@ type commitMsgsResultMsg struct {
 }
 
 type commitChangesResultMsg struct {
-	err error
+	hash string
+	err  error
 }
 
 func (m model) Init() tea.Cmd {
@@ -137,6 +140,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case commitChangesResultMsg:
 		m.state = COMMITED_CHANGES_STATE
 		m.err = msg.err
+		m.succeedCommitHash = msg.hash
 
 		return m, nil
 
@@ -192,8 +196,8 @@ func generateCommitMessagesCmd(llmService *llm.LlmService, diff string, numOfMsg
 
 func commitChangesCmd(message string) tea.Cmd {
 	return func() tea.Msg {
-		err := commitChanges(message)
-		return commitChangesResultMsg{err: err}
+		hash, err := commitChanges(message)
+		return commitChangesResultMsg{err: err, hash: hash}
 	}
 }
 
@@ -226,7 +230,7 @@ func (m model) View() string {
 				Foreground(lipgloss.Color("1")).
 				Render(fmt.Sprintf("Error: %v", m.err))
 		} else {
-			content = ui.SuccessCommit()
+			content = ui.SuccessCommit(m.succeedCommitHash)
 		}
 	}
 

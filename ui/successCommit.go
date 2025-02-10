@@ -1,18 +1,24 @@
 package ui
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"fmt"
 
-func SuccessCommit() string {
+	"github.com/charmbracelet/lipgloss"
+)
+
+func SuccessCommit(commitHash string) string {
 	var (
 		containerStyle = lipgloss.NewStyle().MarginLeft(2)
-		messageStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("2"))
+		titleStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+		messageStyle   = lipgloss.NewStyle()
 		legendsStyle   = lipgloss.NewStyle().Faint(true).MarginTop(1)
 	)
 
 	return containerStyle.Render(
 		lipgloss.JoinVertical(
 			lipgloss.Left,
-			messageStyle.Render("Successfully commited"),
+			titleStyle.Render("Successfully commited diff"),
+			messageStyle.Render(fmt.Sprintf("hash: %s", commitHash)),
 			legendsStyle.Render("q: quit"),
 		),
 	)
