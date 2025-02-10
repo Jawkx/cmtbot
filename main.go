@@ -164,7 +164,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "c":
-			if m.state == SHOW_DIFF_STATE {
+			if m.state == SHOW_DIFF_STATE && m.diffFiles != "" {
 				m.state = GENERATING_COMMIT_STATE
 				cfg, _ := LoadConfig()
 				return m, generateCommitMessagesCmd(m.llmService, m.diff, cfg.NumOfMsg)
@@ -226,7 +226,7 @@ func (m model) View() string {
 				Foreground(lipgloss.Color("1")).
 				Render(fmt.Sprintf("Error: %v", m.err))
 		} else {
-			content = lipgloss.NewStyle().Foreground(lipgloss.Color("2")).MarginLeft(2).Render("Commited Changes")
+			content = ui.SuccessCommit()
 		}
 	}
 
