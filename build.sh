@@ -17,12 +17,23 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Build the application
+# Build the application with version information
 echo "Building the application..."
-go build -o "$OUTPUT_DIR/$EXECUTABLE_NAME"
+LDFLAGS="-X main.version=$VERSION"
+
+go build -ldflags "$LDFLAGS" -o "$OUTPUT_DIR/$EXECUTABLE_NAME"
 if [ $? -ne 0 ]; then
   echo "Error: Failed to build the application."
   exit 1
 fi
 
 echo "Packaging complete. Package: $OUTPUT_DIR/$PROJECT_NAME-$VERSION"
+
+echo "Installing the application..."
+go install -ldflags "$LDFLAGS"
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to install the application."
+    exit 1
+fi
+
+echo "Installation complete."

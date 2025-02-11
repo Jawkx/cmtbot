@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,6 +13,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
 )
+
+var version string
 
 type State int
 
@@ -238,6 +241,15 @@ func (m model) View() string {
 }
 
 func main() {
+
+	versionFlag := flag.Bool("v", false, "Print version info")
+	flag.Parse()
+
+	if *versionFlag {
+		fmt.Println("cmtbot version:", version)
+		os.Exit(0)
+	}
+
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
