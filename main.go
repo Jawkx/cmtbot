@@ -118,16 +118,6 @@ func initialModel() model {
 	}
 }
 
-type commitMsgsResultMsg struct {
-	messages []string
-	err      error
-}
-
-type commitChangesResultMsg struct {
-	hash string
-	err  error
-}
-
 func (m model) Init() tea.Cmd {
 	return m.spinner.Tick
 }
@@ -176,20 +166,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	m.textArea, cmd = m.textArea.Update(msg)
 	return m, cmd
-}
-
-func generateCommitMessagesCmd(llmService *llm.LlmService, diff string, numOfMsg int) tea.Cmd {
-	return func() tea.Msg {
-		messages, err := llmService.GenerateCommitMessages(diff, numOfMsg)
-		return commitMsgsResultMsg{messages: messages, err: err}
-	}
-}
-
-func commitChangesCmd(message string) tea.Cmd {
-	return func() tea.Msg {
-		hash, err := commitChanges(message)
-		return commitChangesResultMsg{err: err, hash: hash}
-	}
 }
 
 func (m model) View() string {

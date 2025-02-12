@@ -30,7 +30,7 @@ func (m model) handleSelectCommitState(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	case "enter":
 		m.state = COMMITING_RESULT_STATE
-		return m, commitChangesCmd(m.messages[m.cursor])
+		return m, generateCommitChangesCmd(m.messages[m.cursor])
 	case "e":
 		m.state = EDIT_COMMIT_STATE
 		m.textArea.SetValue(m.messages[m.cursor])
@@ -43,7 +43,7 @@ func (m model) handleEditCommitState(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "ctrl+s":
 		m.state = COMMITING_RESULT_STATE
-		return m, commitChangesCmd(m.textArea.Value())
+		return m, generateCommitChangesCmd(m.textArea.Value())
 	}
 	return m, nil
 }
