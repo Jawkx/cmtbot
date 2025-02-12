@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/Jawkx/cmtbot/llm"
 	"github.com/Jawkx/cmtbot/ui"
@@ -12,7 +11,6 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/pelletier/go-toml/v2"
 )
 
 var version string
@@ -27,14 +25,6 @@ const (
 	COMMITING_RESULT_STATE
 	COMMITED_CHANGES_STATE
 )
-
-type Config struct {
-	ApiBase   string `toml:"api_base"`
-	ApiKeyEnv string `toml:"api_key_env"`
-	ModelName string `toml:"model_name"`
-	NumOfMsg  int    `toml:"num_of_msg"`
-	Prompt    string `toml:"prompt"`
-}
 
 type model struct {
 	state     State
@@ -55,38 +45,6 @@ type model struct {
 	// components
 	textArea textarea.Model
 	spinner  spinner.Model
-}
-
-func LoadConfig() (Config, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return Config{}, fmt.Errorf("error getting home directory: %w", err)
-	}
-
-	configPath := filepath.Join(homeDir, ".config", "cmtbot", "cmtbot.toml")
-
-	_, err = os.Stat(configPath)
-	if os.IsNotExist(err) {
-		return Config{
-			ApiBase:   "https://openrouter.ai/api/v1/chat/completions",
-			ApiKeyEnv: "OPENROUTER_API_KEY",
-			ModelName: "google/gemini-flash-1.5",
-			NumOfMsg:  5,
-		}, nil
-	}
-
-	configFile, err := os.ReadFile(configPath)
-	if err != nil {
-		return Config{}, fmt.Errorf("error reading config file: %w", err)
-	}
-
-	var config Config
-	err = toml.Unmarshal(configFile, &config)
-	if err != nil {
-		return Config{}, fmt.Errorf("error unmarshaling config file: %w", err)
-	}
-
-	return config, nil
 }
 
 func initialModel() model {
