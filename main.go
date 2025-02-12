@@ -133,10 +133,9 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
 	var cmd tea.Cmd
-	switch msg := msg.(type) {
 
+	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
@@ -144,7 +143,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case spinner.TickMsg:
-		var cmd tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
 
@@ -158,61 +156,26 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.state = COMMITED_CHANGES_STATE
 		m.err = msg.err
 		m.succeedCommitHash = msg.hash
-
 		return m, nil
 
 	case tea.KeyMsg:
-
 		switch msg.String() {
-
 		case "ctrl+c", "q":
 			return m, tea.Quit
+		}
 
-		case "j", "down":
-			if m.state == SELECT_COMMIT_STATE {
-				m.cursor++
-				if m.cursor >= len(m.messages) {
-					m.cursor = 0
-				}
-			}
-
-		case "k", "up":
-			if m.state == SELECT_COMMIT_STATE {
-				m.cursor--
-				if m.cursor < 0 {
-					m.cursor = len(m.messages) - 1
-				}
-			}
-
-		case "c":
-			if m.state == SHOW_DIFF_STATE && m.diffFiles != "" {
-				m.state = GENERATING_COMMIT_STATE
-				cfg, _ := LoadConfig()
-				return m, generateCommitMessagesCmd(m.llmService, m.diff, cfg.NumOfMsg)
-			}
-
-		case "enter":
-			if m.state == SELECT_COMMIT_STATE {
-				m.state = COMMITING_RESULT_STATE
-				return m, commitChangesCmd(m.messages[m.cursor])
-			}
-		case "e":
-			if m.state == SELECT_COMMIT_STATE {
-				m.state = EDIT_COMMIT_STATE
-				m.textArea.SetValue(m.messages[m.cursor])
-				cmd = m.textArea.Focus()
-			}
-		case "ctrl+s":
-			if m.state == EDIT_COMMIT_STATE {
-				m.state = COMMITING_RESULT_STATE
-				return m, commitChangesCmd(m.textArea.Value())
-			}
+		switch m.state {
+		case SHOW_DIFF_STATE:
+			return m.handleShowDiffState(msg)
+		case SELECT_COMMIT_STATE:
+			return m.handleSelectCommitState(msg)
+		case EDIT_COMMIT_STATE:
+			return m.handleEditCommitState(msg)
 		}
 	}
 
 	m.textArea, cmd = m.textArea.Update(msg)
-	cmds = append(cmds, cmd)
-	return m, tea.Batch(cmd)
+	return m, cmd
 }
 
 func generateCommitMessagesCmd(llmService *llm.LlmService, diff string, numOfMsg int) tea.Cmd {
