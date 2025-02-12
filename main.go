@@ -9,6 +9,7 @@ import (
 	"github.com/Jawkx/cmtbot/llm"
 	"github.com/Jawkx/cmtbot/ui"
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/pelletier/go-toml/v2"
@@ -22,6 +23,7 @@ const (
 	SHOW_DIFF_STATE State = iota
 	GENERATING_COMMIT_STATE
 	SELECT_COMMIT_STATE
+	EDIT_COMMIT_STATE
 	COMMITING_RESULT_STATE
 	COMMITED_CHANGES_STATE
 )
@@ -49,7 +51,10 @@ type model struct {
 
 	// services
 	llmService *llm.LlmService
-	spinner    spinner.Model
+
+	// components
+	textArea textarea.Model
+	spinner  spinner.Model
 }
 
 func LoadConfig() (Config, error) {
@@ -93,9 +98,14 @@ func initialModel() model {
 
 	diffFiles, _ := getStagedFiles()
 	diff, _ := getStagedDiff()
+
 	llmService := llm.NewLlmService(cfg.ApiBase, cfg.ApiKeyEnv, cfg.ModelName, cfg.Prompt)
+
 	s := spinner.New(spinner.WithStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("205"))))
 	s.Spinner = spinner.Dot
+
+	ti := textarea.New()
+	ti.ShowLineNumbers = false
 
 	return model{
 		state:      SHOW_DIFF_STATE,
@@ -104,6 +114,7 @@ func initialModel() model {
 		spinner:    s,
 		err:        err, // Store the config loading error
 		llmService: llmService,
+		textArea:   ti,
 	}
 }
 
@@ -122,11 +133,14 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		m.textArea.SetWidth(m.width)
 		return m, nil
 
 	case spinner.TickMsg:
@@ -182,12 +196,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = COMMITING_RESULT_STATE
 				return m, commitChangesCmd(m.messages[m.cursor])
 			}
+		case "e":
+			if m.state == SELECT_COMMIT_STATE {
+				m.state = EDIT_COMMIT_STATE
+				m.textArea.SetValue(m.messages[m.cursor])
+				cmd = m.textArea.Focus()
+			}
+		case "ctrl+s":
+			if m.state == EDIT_COMMIT_STATE {
+				m.state = COMMITING_RESULT_STATE
+				return m, commitChangesCmd(m.textArea.Value())
+			}
 		}
-
-		return m, nil
 	}
 
-	return m, nil
+	m.textArea, cmd = m.textArea.Update(msg)
+	cmds = append(cmds, cmd)
+	return m, tea.Batch(cmd)
 }
 
 func generateCommitMessagesCmd(llmService *llm.LlmService, diff string, numOfMsg int) tea.Cmd {
@@ -221,6 +246,10 @@ func (m model) View() string {
 		} else {
 			content = ui.SelectCommit(m.messages, m.cursor, m.width)
 		}
+	}
+
+	if m.state == EDIT_COMMIT_STATE {
+		content = ui.EditCommit(m.textArea)
 	}
 
 	if m.state == COMMITING_RESULT_STATE {
