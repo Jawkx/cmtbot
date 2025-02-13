@@ -29,8 +29,9 @@ func (s *LlmService) GenerateCommitMessages(
 
 	var promptStringBuilder strings.Builder
 	promptStringBuilder.WriteString(s.prompt)
-	promptStringBuilder.WriteString("Diff:")
+	promptStringBuilder.WriteString("Diff: \n ```")
 	promptStringBuilder.WriteString(diff)
+	promptStringBuilder.WriteString("```")
 	prompt := promptStringBuilder.String()
 
 	messages := make([]string, 0, numOfMessages)
