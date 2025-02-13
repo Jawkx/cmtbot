@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Jawkx/cmtbot/git"
 	"github.com/Jawkx/cmtbot/llm"
 	"github.com/Jawkx/cmtbot/ui"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -27,10 +28,10 @@ const (
 )
 
 type model struct {
-	state     State
-	diffFiles string
-	diff      string
-	err       error
+	state       State
+	stagedFiles []git.StagedFile
+	diff        string
+	err         error
 
 	width  int
 	height int
@@ -54,8 +55,8 @@ func initialModel() model {
 		// You might want to exit here or provide a fallback.
 	}
 
-	diffFiles, _ := getStagedFiles()
-	diff, _ := getStagedDiff()
+	stagedFiles, _ := git.GetStagedFiles()
+	diff, _ := git.GetStagedDiff()
 
 	llmService := llm.NewLlmService(cfg.ApiBase, cfg.ApiKeyEnv, cfg.ModelName, cfg.Prompt)
 
@@ -66,13 +67,13 @@ func initialModel() model {
 	ti.ShowLineNumbers = false
 
 	return model{
-		state:      SHOW_DIFF_STATE,
-		diffFiles:  diffFiles,
-		diff:       diff,
-		spinner:    s,
-		err:        err, // Store the config loading error
-		llmService: llmService,
-		textArea:   ti,
+		state:       SHOW_DIFF_STATE,
+		stagedFiles: stagedFiles,
+		diff:        diff,
+		spinner:     s,
+		err:         err, // Store the config loading error
+		llmService:  llmService,
+		textArea:    ti,
 	}
 }
 
@@ -138,7 +139,7 @@ func (m model) View() string {
 	var content string
 
 	if m.state == SHOW_DIFF_STATE {
-		content = ui.StagedFiles(m.diffFiles)
+		content = ui.StagedFiles(m.stagedFiles)
 	}
 
 	if m.state == GENERATING_COMMIT_STATE {

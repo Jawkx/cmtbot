@@ -3,6 +3,7 @@ package ui
 import (
 	"strings"
 
+	"github.com/Jawkx/cmtbot/git"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -27,8 +28,8 @@ var (
 	legendsStyle    = lipgloss.NewStyle().Faint(true).PaddingRight(1)
 )
 
-func StagedFiles(fileString string) string {
-	if fileString == "" {
+func StagedFiles(stagedFiles []git.StagedFile) string {
+	if len(stagedFiles) == 0 {
 		return containerStyle.Render(lipgloss.JoinVertical(
 			lipgloss.Left,
 			titleStyle.Render("No staged files"),
@@ -36,26 +37,19 @@ func StagedFiles(fileString string) string {
 		))
 	}
 
-	fileStrings := strings.Split(fileString, "\n")
 	var builder strings.Builder
 
-	for _, line := range fileStrings {
-		parts := strings.SplitN(line, "\t", 2)
-		if len(parts) != 2 {
-			continue
-		}
-		status, fileName := parts[0], parts[1]
-
+	for _, file := range stagedFiles {
 		var styled string
-		switch status {
+		switch file.Status {
 		case StatusAdd:
-			styled = newFileStyle.Render("Add") + fileName
+			styled = newFileStyle.Render("Add") + file.Path
 		case StatusModify:
-			styled = editFileStyle.Render("Modify") + fileName
+			styled = editFileStyle.Render("Modify") + file.Path
 		case StatusDelete:
-			styled = deleteFileStyle.Render("Delete") + fileName
+			styled = deleteFileStyle.Render("Delete") + file.Path
 		default:
-			styled = line
+			styled = file.Path
 		}
 
 		builder.WriteString(styled + "\n")
