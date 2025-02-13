@@ -81,6 +81,7 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -88,42 +89,49 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 		m.textArea.SetWidth(m.width)
-		return m, nil
+
+		break
 
 	case spinner.TickMsg:
 		m.spinner, cmd = m.spinner.Update(msg)
-		return m, cmd
+		cmds = append(cmds, cmd)
+		break
 
 	case commitMsgsResultMsg:
 		m.state = SELECT_COMMIT_STATE
 		m.messages = msg.messages
 		m.err = msg.err
-		return m, nil
+		break
 
 	case commitChangesResultMsg:
 		m.state = COMMITED_CHANGES_STATE
 		m.err = msg.err
 		m.succeedCommitHash = msg.hash
-		return m, nil
+		break
 
 	case tea.KeyMsg:
 		switch msg.String() {
+
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		}
 
+		var mNew tea.Model
 		switch m.state {
 		case SHOW_DIFF_STATE:
-			return m.handleShowDiffState(msg)
+			mNew, cmd = m.handleShowDiffState(msg)
 		case SELECT_COMMIT_STATE:
-			return m.handleSelectCommitState(msg)
+			mNew, cmd = m.handleSelectCommitState(msg)
 		case EDIT_COMMIT_STATE:
-			return m.handleEditCommitState(msg)
+			mNew, cmd = m.handleEditCommitState(msg)
 		}
+		m = mNew.(model)
+		cmds = append(cmds, cmd)
 	}
 
 	m.textArea, cmd = m.textArea.Update(msg)
-	return m, cmd
+	cmds = append(cmds, cmd)
+	return m, tea.Batch(cmds...)
 }
 
 func (m model) View() string {
