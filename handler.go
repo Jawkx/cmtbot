@@ -7,10 +7,10 @@ import (
 func (m model) handleShowDiffState(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "c":
-		if m.diffFiles != "" {
+		if len(m.stagedFiles) != 0 {
 			m.state = GENERATING_COMMIT_STATE
 			cfg, _ := LoadConfig()
-			return m, generateCommitMessagesCmd(m.llmService, m.diff, cfg.NumOfMsg)
+			return m, generateCommitMessagesCmd(m.llmService, m.diff, m.stagedFiles, cfg.NumOfMsg)
 		}
 	}
 	return m, nil

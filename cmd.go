@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Jawkx/cmtbot/git"
 	"github.com/Jawkx/cmtbot/llm"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -10,9 +11,14 @@ type commitMsgsResultMsg struct {
 	err      error
 }
 
-func generateCommitMessagesCmd(llmService *llm.LlmService, diff string, numOfMsg int) tea.Cmd {
+func generateCommitMessagesCmd(
+	llmService *llm.LlmService,
+	diff string,
+	diffFiles []git.StagedFile,
+	numOfMsg int,
+) tea.Cmd {
 	return func() tea.Msg {
-		messages, err := llmService.GenerateCommitMessages(diff, numOfMsg)
+		messages, err := llmService.GenerateCommitMessages(diff, diffFiles, numOfMsg)
 		return commitMsgsResultMsg{messages: messages, err: err}
 	}
 }
@@ -24,7 +30,7 @@ type commitChangesResultMsg struct {
 
 func generateCommitChangesCmd(message string) tea.Cmd {
 	return func() tea.Msg {
-		hash, err := commitChanges(message)
+		hash, err := git.CommitChanges(message)
 		return commitChangesResultMsg{err: err, hash: hash}
 	}
 }

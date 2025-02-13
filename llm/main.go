@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/Jawkx/cmtbot/git"
 )
 
 type LlmService struct {
@@ -24,14 +26,28 @@ func NewLlmService(apiBase, apiKeyEnv, modelName, prompt string) *LlmService {
 
 func (s *LlmService) GenerateCommitMessages(
 	diff string,
+	diffFiles []git.StagedFile,
 	numOfMessages int,
 ) ([]string, error) {
 
 	var promptStringBuilder strings.Builder
 	promptStringBuilder.WriteString(s.prompt)
-	promptStringBuilder.WriteString("Diff: \n ```")
+
+	promptStringBuilder.WriteString("## Changed Files:\n")
+	for _, file := range diffFiles {
+
+		fileContent, _ := getFileContent(file.Path)
+
+		promptStringBuilder.WriteString(fmt.Sprintf("### FilePath: %s \n", file.Path))
+		promptStringBuilder.WriteString("``` \n")
+		promptStringBuilder.WriteString(fileContent)
+		promptStringBuilder.WriteString("\n ```")
+	}
+
+	promptStringBuilder.WriteString("## Diff: \n ```")
 	promptStringBuilder.WriteString(diff)
-	promptStringBuilder.WriteString("```")
+	promptStringBuilder.WriteString("\n ```")
+
 	prompt := promptStringBuilder.String()
 
 	messages := make([]string, 0, numOfMessages)

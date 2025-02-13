@@ -28,3 +28,11 @@ func (s *LlmService) makeAPIRequest(body []byte) (*http.Response, error) {
 
 	return resp, nil
 }
+
+func getFileContent(filePath string) (string, error) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
+}
