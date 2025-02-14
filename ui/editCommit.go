@@ -15,7 +15,7 @@ func EditCommit(textArea textarea.Model) string {
 		lipgloss.JoinVertical(
 			lipgloss.Left,
 			textArea.View(),
-			legendsStyle.Render("ctrl + s: commit, esc: back"),
+			legendsStyle.Render("ctrl+s: commit, esc: back"),
 		),
 	)
 }
