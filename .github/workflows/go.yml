@@ -22,17 +22,18 @@ jobs:
         VERSION=$(cat VERSION)
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+    - name: Create Tag
+      uses: negz/create-tag@v1
+      with:
+        version: ${{ env.VERSION }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build
       run: |
         REPO_NAME=$(basename ${{ github.repository }})
         BINARY_NAME=$REPO_NAME
         go build -v -ldflags "-X main.version=${{ env.VERSION }}" -o $BINARY_NAME .
         echo "BINARY_NAME=$BINARY_NAME" >> $GITHUB_ENV
-
-    - name: Create tag
-      run: |
-        git tag ${{ env.VERSION }}
-        git push origin ${{ env.VERSION }}
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
