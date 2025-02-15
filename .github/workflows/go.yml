@@ -23,10 +23,11 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Create Tag
-      uses: negz/create-tag@v1
+      uses: piszmog/create-tag@v1
       with:
-        version: ${{ env.VERSION }}
+        version: v{{ env.VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
+        message: release-v${{ github.event.inputs.message }}
 
     - name: Build
       run: |
