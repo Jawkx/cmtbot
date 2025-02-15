@@ -1,12 +1,7 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
 name: Go
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
     branches: [ "master" ]
 
 jobs:
@@ -21,5 +16,27 @@ jobs:
       with:
         go-version-file: 'go.mod'
 
+    - name: Get app version
+      id: get_version
+      run: |
+        VERSION=$(cat VERSION)
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
     - name: Build
-      run: go build -v ./...
+      run: |
+        REPO_NAME=$(basename ${{ github.repository }})
+        BINARY_NAME=$REPO_NAME
+        go build -v -ldflags "-X main.version=${{ env.VERSION }}" -o $BINARY_NAME ./...
+        echo "BINARY_NAME=$BINARY_NAME" >> $GITHUB_ENV
+
+    - name: Create tag
+      run: |
+        git tag ${{ env.VERSION }}
+        git push origin ${{ env.VERSION }}
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        body_path: CHANGELOG.txt
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: ./${{ env.BINARY_NAME }} 
