@@ -22,12 +22,10 @@ jobs:
         VERSION=$(cat VERSION)
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-    - name: Create Tag
-      uses: piszmog/create-tag@v1
-      with:
-        version: ${{ env.VERSION }}
-        token: ${{ secrets.GITHUB_TOKEN }}
-        message: release-v${{ github.event.inputs.message }}
+    - name: Create Git tag
+      run: |
+        git tag -a v${{ env.VERSION }} -m "Release v${{ env.VERSION }}"
+        git push origin v${{ env.VERSION }}
 
     - name: Build
       run: |
