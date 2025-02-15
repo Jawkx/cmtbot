@@ -25,7 +25,7 @@ jobs:
     - name: Create Tag
       uses: piszmog/create-tag@v1
       with:
-        version: {{ env.VERSION }}
+        version: ${{ env.VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
         message: release-v${{ github.event.inputs.message }}
 
