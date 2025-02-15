@@ -26,7 +26,7 @@ jobs:
       run: |
         REPO_NAME=$(basename ${{ github.repository }})
         BINARY_NAME=$REPO_NAME
-        go build -v -ldflags "-X main.version=${{ env.VERSION }}" -o $BINARY_NAME ./...
+        go build -v -ldflags "-X main.version=${{ env.VERSION }}" -o $BINARY_NAME .
         echo "BINARY_NAME=$BINARY_NAME" >> $GITHUB_ENV
 
     - name: Create tag
