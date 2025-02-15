@@ -43,5 +43,6 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         body_path: CHANGELOG.txt
+        tag_name: v${{ env.VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
         files: ./${{ env.BINARY_NAME }} 
