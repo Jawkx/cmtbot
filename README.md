@@ -19,21 +19,11 @@ chmod +x <downloaded binary>
 1. Copy this and paste it in your terminal (remember to change the version in `DOWNLOAD_URL` eg: `https://github.com/Jawkx/cmtbot/releases/download/v0.1.0/cmtbot-darwin-amd64`)
 
 ``` bash
-DOWNLOAD_URL="https://github.com/Jawkx/cmtbot/releases/download/<change to version you want>/cmtbot-darwin-amd64"
-EXECUTABLE_NAME="cmtbot"
-INSTALL_DIR="/usr/local/bin"
+# Macos
+curl -L "https://github.com/Jawkx/cmtbot/releases/download/<VERSION>/cmtbot-darwin-amd64" -o cmtbot && chmod +x cmtbot && sudo mkdir -p /usr/local/bin 2>/dev/null && sudo mv cmtbot /usr/local/bin/cmtbot
 
-echo "Downloading cmtbot..."
-curl -L "$DOWNLOAD_URL" -o "$EXECUTABLE_NAME"
-
-echo "Making cmtbot executable..."
-chmod +x "$EXECUTABLE_NAME"
-
-echo "Installing cmtbot to $INSTALL_DIR..."
-sudo mkdir -p "$INSTALL_DIR" 2>/dev/null # Creates dir if it doesnt exist, suppress errors if it does.
-sudo mv "$EXECUTABLE_NAME" "$INSTALL_DIR/$EXECUTABLE_NAME"
-
-echo "cmtbot installed successfully!"
+# Linux
+curl -L "https://github.com/Jawkx/cmtbot/releases/download/<VERSION>/cmtbot-linux-amd64" -o cmtbot && chmod +x cmtbot && sudo mkdir -p /usr/local/bin 2>/dev/null && sudo mv cmtbot /usr/local/bin/cmtbot
 ```
 
 ## Setup
