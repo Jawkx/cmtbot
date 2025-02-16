@@ -28,9 +28,9 @@ build_binary() {
 
 # Build for each target platform
 for target in "${TARGETS[@]}"; do
-  local os=$(echo "$target" | cut -d'/' -f1)
-  local arch=$(echo "$target" | cut -d'/' -f2)
-  local output_name="cmtbot-${os}-${arch}"
+  os=$(echo "$target" | cut -d'/' -f1)
+  arch=$(echo "$target" | cut -d'/' -f2)
+  output_name="cmtbot-${os}-${arch}"
   
   if [ "$os" == "windows" ]; then
     output_name="${output_name}.exe"
