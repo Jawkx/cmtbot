@@ -41,6 +41,13 @@ jobs:
         chmod +x ./.github/workflows/buildCrossPlatform.sh
         ./.github/workflows/buildCrossPlatform.sh
 
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        body_path: CHANGELOG.txt
+        tag_name: v${{ env.VERSION }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+          
     - name: Upload build-artifacts
       uses: skx/github-action-publish-binaries@master
       env:
@@ -48,10 +55,3 @@ jobs:
       with:
         args: "./dist/*"
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        body_path: CHANGELOG.txt
-        tag_name: v${{ env.VERSION }}
-        token: ${{ secrets.GITHUB_TOKEN }}
-        files: ./dist 
