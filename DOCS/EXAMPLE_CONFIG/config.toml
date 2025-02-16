@@ -1,0 +1,5 @@
+api_base = "https://api.openai.com/v1/chat/completions"
+api_key_env = "OPENAI_API_KEY"
+model_name = "gpt-4-turbo-preview"
+num_of_msg = 5
+prompt_filename = "prompt"
