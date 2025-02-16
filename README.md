@@ -2,6 +2,8 @@
 
 A terminal apps that helps generate commit using AI
 
+<img src="https://raw.githubusercontent.com/Jawkx/cmtbot/refs/heads/dev/DOCS/demo.gif" width="100%" alt="cmtbot demo">
+
 ## Installation
 
 1. Download the executable from [Release page](https://github.com/Jawkx/cmtbot/releases)
@@ -38,7 +40,7 @@ echo "cmtbot installed successfully!"
 
 1. To use this app, you first need to choose a LLM provider that have OpenAi compatible API (which is almost all of them). After getting a API key there, find a way to [load it in your environment variable](https://www.perplexity.ai/search/zsh-how-to-add-key-to-environm-escTutp0SJOINLwFpsu4VQ)
 2. Create a directory `~/.config/cmtbot/`
-3. In the directory create a file called `prompt.md` (or anything really), this will be your prompt used to generate the commit messages, you can check out a sample prompt file [here](https://github.com/Jawkx/cmtbot/blob/master/DOCS/EXAMPLE_CONFIG/prompt.md)
+3. In the directory create a file called `prompt.md` (or anything really), this will be your prompt used to generate the commit messages, you can check out a sample prompt file [here](https://github.com/Jawkx/cmtbot/blob/dev/DOCS/EXAMPLE_CONFIG/prompt.md)
 4. After that create another file in the directory called `config.toml`
 5. In `config.toml` paste this and edit this base on your the environment variable key you setup in step 1 and also choose your model
 
@@ -50,4 +52,4 @@ num_of_msg = 5 # number of mesage generated for selection
 prompt_filename = "prompt.md" # File name you set in step 3`
 ```
 
-Can reference this [example config](https://github.com/Jawkx/cmtbot/tree/master/DOCS/EXAMPLE_CONFIG/)
+Can reference this [example config](https://github.com/Jawkx/cmtbot/tree/dev/DOCS/EXAMPLE_CONFIG/)
