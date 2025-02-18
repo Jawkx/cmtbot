@@ -1,17 +1,6 @@
-Features:
-
-• Introduced  FileStatus  enum for improved clarity and maintainability in staged file handling.
-• Enhanced user experience by displaying file status in the UI using the  FileStatus  enum.
-
 Fixes:
 
-• Increased the file content size limit to 1MB for prompt processing.
-• Added a message to inform users when file content length exceeds 100000 characters in the
-prompt.
-
-Refactor:
-
-• Removed redundant status string in the staged files UI.
-• Limited the length of file content added to the prompt.
-• Refactored staged file handling to utilize the  FileStatus  enum.
+• Limit to 1MB for prompt processing.
+- Add diff type to prompt processing
+- Support all different type of operation
 
