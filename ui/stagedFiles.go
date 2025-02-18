@@ -51,11 +51,11 @@ func StagedFiles(stagedFiles []git.StagedFile) string {
 		case model.StatusAdded:
 			styled = newFileStyle.Render(
 				model.StatusAdded.Name(),
-			) + file.Path + " " + file.Status.String()
+			) + file.Path
 		case model.StatusModified:
 			styled = editFileStyle.Render(
 				model.StatusModified.Name(),
-			) + file.Path + " " + file.Status.String()
+			) + file.Path
 		case model.StatusDeleted:
 			styled = deleteFileStyle.Render(
 				model.StatusDeleted.Name(),
