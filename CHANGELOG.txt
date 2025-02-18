@@ -1,2 +1,6 @@
-- Rework config file by seperating prompt from config
-- Updated docs
+Fixes:
+
+• Limit to 1MB for prompt processing.
+- Add diff type to prompt processing
+- Support all different type of operation
+
