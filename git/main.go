@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"os/exec"
 	"strings"
+
+	"github.com/Jawkx/cmtbot/model"
 )
 
 func GetStagedDiff() (string, error) {
@@ -16,7 +18,7 @@ func GetStagedDiff() (string, error) {
 
 type StagedFile struct {
 	Path   string
-	Status string
+	Status model.FileStatus
 }
 
 func GetStagedFiles() ([]StagedFile, error) {
@@ -39,11 +41,32 @@ func GetStagedFiles() ([]StagedFile, error) {
 	fileStringSlice := strings.Split(fileStrings, "\n")
 
 	for _, fileString := range fileStringSlice {
+
 		parts := strings.SplitN(fileString, "\t", 2)
 		if len(parts) != 2 {
 			continue
 		}
-		status, filePath := parts[0], parts[1]
+		statusString, filePath := parts[0], parts[1]
+
+		var status model.FileStatus
+
+		switch statusString {
+		case model.StatusAdded.String():
+			status = model.StatusAdded
+		case model.StatusModified.String():
+			status = model.StatusModified
+		case model.StatusDeleted.String():
+			status = model.StatusDeleted
+		case model.StatusRenamed.String():
+			status = model.StatusRenamed
+		case model.StatusCopied.String():
+			status = model.StatusCopied
+		case model.StatusUnmodified.String():
+			status = model.StatusUnmodified
+		default:
+			status = model.StatusUnknown
+		}
+
 		result = append(result, StagedFile{
 			Path:   filePath,
 			Status: status,

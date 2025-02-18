@@ -38,7 +38,9 @@ func (s *LlmService) GenerateCommitMessages(
 
 		fileContent, _ := getFileContent(file.Path)
 
-		promptStringBuilder.WriteString(fmt.Sprintf("### FilePath: %s \n", file.Path))
+		promptStringBuilder.WriteString(
+			fmt.Sprintf("### %s FilePath: %s \n", file.Status.Name(), file.Path),
+		)
 		promptStringBuilder.WriteString("``` \n")
 		promptStringBuilder.WriteString(fileContent)
 		promptStringBuilder.WriteString("\n ```")
