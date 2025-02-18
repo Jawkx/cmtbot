@@ -43,7 +43,7 @@ func (s *LlmService) GenerateCommitMessages(
 		)
 		promptStringBuilder.WriteString("``` \n")
 
-		if len(fileContent) > 100000 {
+		if len(fileContent) > 1000000 {
 			promptStringBuilder.WriteString(
 				"File is too large to be shown, use the file naming as context clue\n",
 			)
