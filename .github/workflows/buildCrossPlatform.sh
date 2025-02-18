@@ -21,7 +21,7 @@ build_binary() {
   export GOARCH="${GOARCH}"
 
   # Build the binary
-  go build -v -ldflags "-X main.version=${VERSION}" -o "${OUTPUT_DIR}/${OUTPUT_NAME}"
+  go build -w -v -ldflags "-X main.version=${VERSION}" -o "${OUTPUT_DIR}/${OUTPUT_NAME}"
   
   echo "Build finished: ${OUTPUT_DIR}/${OUTPUT_NAME}"
 }
