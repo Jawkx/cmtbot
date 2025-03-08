@@ -9,7 +9,7 @@ import (
 )
 
 func GetStagedDiff() (string, error) {
-	cmd := exec.Command("git", "diff", "--staged")
+	cmd := exec.Command("git", "diff", "--staged", "-U99999")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()

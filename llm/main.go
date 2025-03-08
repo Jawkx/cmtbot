@@ -33,27 +33,6 @@ func (s *LlmService) GenerateCommitMessages(
 	var promptStringBuilder strings.Builder
 	promptStringBuilder.WriteString(s.prompt)
 
-	promptStringBuilder.WriteString("## Changed Files:\n")
-	for _, file := range diffFiles {
-
-		fileContent, _ := getFileContent(file.Path)
-
-		promptStringBuilder.WriteString(
-			fmt.Sprintf("### %s FilePath: %s \n", file.Status.Name(), file.Path),
-		)
-		promptStringBuilder.WriteString("``` \n")
-
-		if len(fileContent) > 1000000 {
-			promptStringBuilder.WriteString(
-				"File is too large to be shown, use the file naming as context clue\n",
-			)
-		} else {
-			promptStringBuilder.WriteString(fileContent)
-		}
-
-		promptStringBuilder.WriteString("\n ```")
-	}
-
 	promptStringBuilder.WriteString("## Diff: \n ```")
 	promptStringBuilder.WriteString(diff)
 	promptStringBuilder.WriteString("\n ```")
