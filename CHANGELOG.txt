@@ -1,6 +1,4 @@
-Fixes:
+Changes:
 
-• Limit to 1MB for prompt processing.
-- Add diff type to prompt processing
-- Support all different type of operation
-
+- Instead of dumping the file content, use `-U` flag to increase the context window on the git side
+- Change to using [Epoch Semver](https://antfu.me/posts/epoch-semver)
